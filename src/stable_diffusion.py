@@ -46,8 +46,8 @@ class StableDiffusion(nn.Module):
 
 
         # 3. The UNet model for generating the latents.
-        #self.unet = UNet2DConditionModel.from_pretrained(model_name, torch_dtype = torch.float16, subfolder="unet", use_auth_token=self.token).to(self.device)
-        self.unet = UNet2DConditionModel.from_pretrained(model_name, subfolder="unet", use_auth_token=self.token).to(self.device)
+        self.unet = UNet2DConditionModel.from_pretrained(model_name, torch_dtype = torch.float16, subfolder="unet", use_auth_token=self.token).to(self.device)
+        #self.unet = UNet2DConditionModel.from_pretrained(model_name, subfolder="unet", use_auth_token=self.token).to(self.device)
 
         # 4. Create a scheduler for inference
         self.scheduler = PNDMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", num_train_timesteps=self.num_train_timesteps)
@@ -241,6 +241,9 @@ if __name__ == '__main__':
     import argparse
     import matplotlib.pyplot as plt
 
+    # import os
+    # os.environ["PYTORCH_CUDA_ALLOC_CONF"] = 'max_split_size_mb:32'
+
     parser = argparse.ArgumentParser()
     parser.add_argument('prompt', type=str)
     parser.add_argument('-H', type=int, default=512)
@@ -248,7 +251,8 @@ if __name__ == '__main__':
     parser.add_argument('--steps', type=int, default=50)
     opt = parser.parse_args()
 
-    device = torch.device('cpu')
+    device = torch.device('cuda')
+    #device = torch.device('cpu')
 
     start_time = time.time()
     sd = StableDiffusion(device)
