@@ -6,6 +6,7 @@ from diffusers import AutoencoderKL, UNet2DConditionModel, PNDMScheduler
 # suppress partial model loading warning
 logging.set_verbosity_error()
 
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -34,6 +35,7 @@ class StableDiffusion(nn.Module):
         logger.info(f'loading stable diffusion with {model_name}...')
                 
         # 1. Load the autoencoder model which will be used to decode the latents into image space. 
+        #self.vae = AutoencoderKL.from_pretrained(model_name, torch_dtype = torch.float16, subfolder="vae", use_auth_token=self.token).to(self.device)
         self.vae = AutoencoderKL.from_pretrained(model_name, subfolder="vae", use_auth_token=self.token).to(self.device)
 
         # 2. Load the tokenizer and text encoder to tokenize and encode the text. 
@@ -44,6 +46,7 @@ class StableDiffusion(nn.Module):
 
 
         # 3. The UNet model for generating the latents.
+        #self.unet = UNet2DConditionModel.from_pretrained(model_name, torch_dtype = torch.float16, subfolder="unet", use_auth_token=self.token).to(self.device)
         self.unet = UNet2DConditionModel.from_pretrained(model_name, subfolder="unet", use_auth_token=self.token).to(self.device)
 
         # 4. Create a scheduler for inference
@@ -202,17 +205,29 @@ class StableDiffusion(nn.Module):
 
     def prompt_to_img(self, prompts, height=512, width=512, num_inference_steps=50, guidance_scale=7.5, latents=None):
 
+        
+
         if isinstance(prompts, str):
             prompts = [prompts]
 
         # Prompts -> text embeds
+        start_time = time.time()
         text_embeds = self.get_text_embeds(prompts) # [2, 77, 768]
+        end_time = time.time()
+        print('Prompts -> text embeds cost', end_time - start_time, 'seconds')
 
         # Text embeds -> img latents
+        start_time = time.time()
         latents = self.produce_latents(text_embeds, height=height, width=width, latents=latents, num_inference_steps=num_inference_steps, guidance_scale=guidance_scale) # [1, 4, 64, 64]
-        
+        end_time = time.time()
+        print('Text embeds -> img latents cost', end_time - start_time, 'seconds')
+
+
         # Img latents -> imgs
+        start_time = time.time()
         imgs = self.decode_latents(latents) # [1, 3, 512, 512]
+        end_time = time.time()
+        print('Img latents -> imgs cost', end_time - start_time, 'seconds')
 
         # Img to Numpy
         imgs = imgs.detach().cpu().permute(0, 2, 3, 1).numpy()
@@ -233,9 +248,12 @@ if __name__ == '__main__':
     parser.add_argument('--steps', type=int, default=50)
     opt = parser.parse_args()
 
-    device = torch.device('cuda')
+    device = torch.device('cpu')
 
+    start_time = time.time()
     sd = StableDiffusion(device)
+    end_time = time.time()
+    print('initialize StableDiffusion cost', end_time - start_time, 'seconds')
 
     imgs = sd.prompt_to_img(opt.prompt, opt.H, opt.W, opt.steps)
 
