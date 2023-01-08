@@ -46,8 +46,8 @@ class StableDiffusion(nn.Module):
 
 
         # 3. The UNet model for generating the latents.
-        self.unet = UNet2DConditionModel.from_pretrained(model_name, torch_dtype = torch.float16, subfolder="unet", use_auth_token=self.token).to(self.device)
-        #self.unet = UNet2DConditionModel.from_pretrained(model_name, subfolder="unet", use_auth_token=self.token).to(self.device)
+        #self.unet = UNet2DConditionModel.from_pretrained(model_name, torch_dtype = torch.float16, subfolder="unet", use_auth_token=self.token).to(self.device)
+        self.unet = UNet2DConditionModel.from_pretrained(model_name, subfolder="unet", use_auth_token=self.token).to(self.device)
 
         # 4. Create a scheduler for inference
         self.scheduler = PNDMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", num_train_timesteps=self.num_train_timesteps)
