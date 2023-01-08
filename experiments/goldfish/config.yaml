@@ -9,12 +9,12 @@ guide:
   texture_interpolation_mode: nearest
 log:
   eval_only: false
-  eval_size: 5
+  eval_size: 10
   exp_name: goldfish
   exp_root: experiments
-  full_eval_size: 10
-  max_keep_ckpts: 1
-  save_interval: 10
+  full_eval_size: 100
+  max_keep_ckpts: 2
+  save_interval: 100
   save_mesh: true
 optim:
   ckpt: null

@@ -1,0 +1,8 @@
+python -m scripts.train_latent_paint --config_path demo_configs/latent_paint/goldfish.yaml
+
+pip path:
+gamelab ian:
+C:\Users\ian28\anaconda3\envs\kaolin\Scripts\pip
+
+
+install git+https://github.com/NVIDIAGameWorks/kaolin
