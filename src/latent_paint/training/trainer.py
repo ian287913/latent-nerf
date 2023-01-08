@@ -305,6 +305,7 @@ class Trainer:
 
         if len(self.past_checkpoints) > self.cfg.log.max_keep_ckpts:
             old_ckpt = self.ckpt_path / self.past_checkpoints.pop(0)
-            old_ckpt.unlink(missing_ok=True)
+            print("Should delete file: ", old_ckpt, " but the unlink function is in python38")
+            ##old_ckpt.unlink(missing_ok=True)
 
         torch.save(state, self.ckpt_path / file_path)
