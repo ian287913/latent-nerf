@@ -1,7 +1,11 @@
 log:
-  exp_name: 'custom_goldfish'
+  exp_name: 'custom_goldfish_2_highTrainRes'
 guide:
   text: 'a goldfish'
   shape_path: experiments/resources/example_output_goldfish.obj
 render:
   backbone: 'texture-mesh'
+  train_grid_size: 128
+  radius_range: [0.6, 0.8]
+optim:
+  iters: 5000
