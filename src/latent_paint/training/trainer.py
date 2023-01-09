@@ -53,6 +53,7 @@ class Trainer:
 
         logger.info(f'Successfully initialized {self.cfg.log.exp_name}')
 
+    # ian: this model includes Kaolin.dib-r!
     def init_mesh_model(self) -> nn.Module:
         if self.cfg.render.backbone == 'texture-mesh':
             from src.latent_paint.models.textured_mesh import TexturedMeshModel
