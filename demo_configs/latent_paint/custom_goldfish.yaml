@@ -1,11 +1,12 @@
 log:
-  exp_name: 'custom_goldfish_2_highTrainRes_morePrompt'
+  exp_name: 'custom_goldfish_5_highTrainRes_highEvalRes_morePrompt'
+  save_interval: 500
 guide:
-  text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp'
+  text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp, (black background)'
   shape_path: experiments/resources/example_output_goldfish.obj
 render:
-  backbone: 'texture-mesh'
-  train_grid_size: 128
+  train_grid_size: 1024
+  eval_grid_size: 1024
   radius_range: [0.6, 0.8]
 optim:
   iters: 5000
