@@ -1,3 +1,4 @@
+python -m scripts.train_latent_paint --config_path demo_configs/latent_paint/custom_goldfish.yaml
 python -m scripts.train_latent_paint --config_path demo_configs/latent_paint/goldfish.yaml
 
 pip path:
