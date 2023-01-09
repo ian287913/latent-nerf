@@ -1,0 +1,7 @@
+log:
+  exp_name: 'custom_goldfish'
+guide:
+  text: 'a goldfish'
+  shape_path: experiments/resources/example_output_goldfish.obj
+render:
+  backbone: 'texture-mesh'
