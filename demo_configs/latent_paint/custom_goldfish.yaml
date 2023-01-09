@@ -1,7 +1,7 @@
 log:
-  exp_name: 'custom_goldfish_2_highTrainRes'
+  exp_name: 'custom_goldfish_2_highTrainRes_morePrompt'
 guide:
-  text: 'a goldfish'
+  text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp'
   shape_path: experiments/resources/example_output_goldfish.obj
 render:
   backbone: 'texture-mesh'
