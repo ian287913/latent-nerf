@@ -200,7 +200,7 @@ class TexturedMeshModel(nn.Module):
                                                                        azim=phi,
                                                                        radius=radius,
                                                                        look_at_height=self.dy)
-
+        # this renders a texture of the env_sphere based on background_sphere_colors
         pred_back, _ = self.renderer.render_single_view(self.env_sphere,
                                                         background_sphere_colors,
                                                         elev=theta,

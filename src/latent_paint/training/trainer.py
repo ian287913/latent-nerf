@@ -151,6 +151,8 @@ class Trainer:
         if save_as_video:
             all_preds = []
         for i, data in enumerate(dataloader):
+            # render a frame according to the camera settings(data)
+            # what is textures??
             preds, textures = self.eval_render(data)
 
             pred = tensor2numpy(preds[0])

@@ -36,9 +36,12 @@ class Renderer:
 
         camera_transform = self.get_camera_from_view(torch.tensor(elev), torch.tensor(azim), r=radius,
                                                 look_at_height=look_at_height).to(self.device)
+        # ian: face_vertices_camera are vertices transformed by the camera transform
+        # ian: face_vertices_image are vertices projected by the camera transform and projection (these vertices are on a camera plane coordinate)
         face_vertices_camera, face_vertices_image, face_normals = kal.render.mesh.prepare_vertices(
             mesh.vertices.to(self.device), mesh.faces.to(self.device), self.camera_projection, camera_transform=camera_transform)
-
+        # ian: image_features is the sampled value, could be uv coordinate, vertex color or something else
+        # ian: face_idx is the rendered face index, -1 is None, of shape (\text{batch_size}, \text{height}, \text{width})
         image_features, face_idx = kal.render.mesh.rasterize(dims[1], dims[0], face_vertices_camera[:, :, :, -1],
                                                               face_vertices_image, face_attributes)
 
