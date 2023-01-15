@@ -71,6 +71,9 @@ class TexturedMeshModel(nn.Module):
         init_background_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
             list(init_background_rgb_color)).float().to(A.device)
 
+        print("init bg value in latent = ")
+        print(init_background_color_in_latent)
+
         # ian: init background_sphere_colors as all black
         background_sphere_colors = nn.Parameter(
             init_background_color_in_latent[None, :, None, None] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 4).cuda())
