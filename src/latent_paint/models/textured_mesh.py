@@ -57,7 +57,7 @@ class TexturedMeshModel(nn.Module):
 
         return env_sphere, mesh
 
-    def init_paint(self, init_rgb_color=(1.0, 0.0, 0.0), init_background_rgb_color=(0.0, 0.0, 0.0)):
+    def init_paint(self, init_rgb_color=(1.0, 0.0, 0.0), init_background_rgb_color=(0.0, 0.0, 1.0)):
         # random color face attributes for background sphere
         # [1, F, 3, 4]
         #background_sphere_colors = nn.Parameter(torch.rand(1, self.env_sphere.faces.shape[0], 3, 4).fill_(0.0).cuda())
