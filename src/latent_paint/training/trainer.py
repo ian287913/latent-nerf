@@ -132,6 +132,7 @@ class Trainer:
                 # ian: how to calc the gradient? where are the parameters??
                 self.optimizer.step()
 
+                # ian: just save some stuff
                 if self.train_step % self.cfg.log.save_interval == 0:
                     self.save_checkpoint(full=True)
                     self.evaluate(self.dataloaders['val'], self.eval_renders_path)

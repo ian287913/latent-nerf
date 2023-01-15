@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-
+# ian: determine the "direction"(front, side, back, ...) by spherical coordinates
 def get_view_direction(thetas, phis, overhead, front):
     #                   phis [B,];          thetas: [B,]
     # front = 0         [0, front)
