@@ -2,8 +2,9 @@ log:
   exp_name: 'custom_goldfish_5_highTrainRes_highEvalRes_morePrompt'
   save_interval: 500
 guide:
-  text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp, (black background)'
+  text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp, (black background), (side view)'
   shape_path: experiments/resources/example_output_goldfish.obj
+  append_direction: False
 render:
   train_grid_size: 1024
   eval_grid_size: 1024
