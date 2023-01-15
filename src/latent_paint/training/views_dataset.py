@@ -72,11 +72,15 @@ class ViewsDataset:
         if self.justside:
             # ian: generate side-view only poses
             dirs, thetas, phis, radius = side_poses(B, self.device, radius_range=self.cfg.radius_range,
+                                                    theta_range=self.cfg.theta_range,
+                                                    phi_range=self.cfg.phi_range,
                                                     angle_overhead=self.cfg.angle_overhead,
                                                     angle_front=self.cfg.angle_front)
         elif self.training:
             # random pose on the fly
             dirs, thetas, phis, radius = rand_poses(B, self.device, radius_range=self.cfg.radius_range,
+                                                    theta_range=self.cfg.theta_range,
+                                                    phi_range=self.cfg.phi_range,
                                                     angle_overhead=self.cfg.angle_overhead,
                                                     angle_front=self.cfg.angle_front)
 

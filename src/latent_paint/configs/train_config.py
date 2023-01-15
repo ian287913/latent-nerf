@@ -13,6 +13,11 @@ class RenderConfig:
     eval_grid_size: int = 512
     # training camera radius range
     radius_range: Tuple[float, float] = (1.0, 1.5)
+
+    # ian: restrict the pose range
+    phi_range: Tuple[float, float] = (-10, 10)
+    theta_range: Tuple[float, float] = (80, 100)
+
     # Set [0,angle_overhead] as the overhead region
     angle_overhead: float = 30
     # Define the front angle region

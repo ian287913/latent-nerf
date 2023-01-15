@@ -8,5 +8,7 @@ render:
   train_grid_size: 1024
   eval_grid_size: 1024
   radius_range: [0.6, 0.8]
+  theta_range: [80, 100]
+  phi_range: [-10, 10]
 optim:
   iters: 5000
