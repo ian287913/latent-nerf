@@ -1,5 +1,5 @@
 log:
-  exp_name: 'custom_goldfish_5_highTrainRes_highEvalRes_morePrompt'
+  exp_name: 'custom_goldfish_7_highTrainRes_highEvalRes_morePrompt_fixeddir'
   save_interval: 500
 guide:
   text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp, (black background), (side view)'
