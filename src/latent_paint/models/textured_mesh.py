@@ -57,17 +57,26 @@ class TexturedMeshModel(nn.Module):
 
         return env_sphere, mesh
 
-    def init_paint(self, init_rgb_color=(0.0, 0.0, 1.0)):
+    def init_paint(self, init_rgb_color=(1.0, 0.0, 0.0), init_background_rgb_color=(0.0, 0.0, 0.0)):
         # random color face attributes for background sphere
-        background_sphere_colors = nn.Parameter(torch.rand(1, self.env_sphere.faces.shape[0], 3, 4).cuda())
+        # [1, F, 3, 4]
+        #background_sphere_colors = nn.Parameter(torch.rand(1, self.env_sphere.faces.shape[0], 3, 4).cuda())
 
         # inverse linear approx to find latent
         A = self.linear_rgb_estimator.T
         regularizer = 1e-2
         init_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
             list(init_rgb_color)).float().to(A.device)
+        
+        init_background_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
+            list(init_background_rgb_color)).float().to(A.device)
+
+        # ian: init background_sphere_colors as all black
+        background_sphere_colors = nn.Parameter(
+            init_background_color_in_latent[None, :, None, None] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 4).cuda())
 
         # init colors with target latent plus some noise
+        # [1, 4, R, R]
         texture_img = nn.Parameter(
             init_color_in_latent[None, :, None, None] * 0.3 + 0.4 * torch.randn(1, 4, self.texture_resolution,
                                                                                 self.texture_resolution).cuda())
