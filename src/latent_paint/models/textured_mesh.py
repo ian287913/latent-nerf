@@ -60,9 +60,8 @@ class TexturedMeshModel(nn.Module):
     def init_paint(self, init_rgb_color=(1.0, 0.0, 0.0), init_background_rgb_color=(0.0, 0.0, 0.0)):
         # random color face attributes for background sphere
         # [1, F, 3, 4]
-        background_sphere_colors = nn.Parameter(torch.rand(1, self.env_sphere.faces.shape[0], 3, 4).fill_(0.0).cuda())
+        #background_sphere_colors = nn.Parameter(torch.rand(1, self.env_sphere.faces.shape[0], 3, 4).fill_(0.0).cuda())
 
-        print(f"size of background_sphere_colors = {background_sphere_colors.size()}")
 
         # inverse linear approx to find latent
         A = self.linear_rgb_estimator.T
@@ -73,13 +72,15 @@ class TexturedMeshModel(nn.Module):
         print(f"size of init_color_in_latent = {init_color_in_latent.size()}")
 
         
-        # init_background_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
-        #     list(init_background_rgb_color)).float().to(A.device)
-        # print("init bg value in latent = ")
-        # print(init_background_color_in_latent)
-        # # ian: init background_sphere_colors as all black
-        # background_sphere_colors = nn.Parameter(
-        #     init_background_color_in_latent[None, :, None, None] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 4).cuda())
+        init_background_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
+            list(init_background_rgb_color)).float().to(A.device)
+        print(f"size of init_background_color_in_latent = {init_background_color_in_latent.size()}")
+
+        print(f"init bg value in latent = {init_background_color_in_latent}")
+        # ian: init background_sphere_colors as all black
+        background_sphere_colors = nn.Parameter(
+            init_background_color_in_latent[None, None, None, :] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 4).cuda())
+        print(f"size of background_sphere_colors = {background_sphere_colors.size()}")
 
         # init colors with target latent plus some noise
         # [1, 4, R, R]
