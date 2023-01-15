@@ -62,11 +62,16 @@ class TexturedMeshModel(nn.Module):
         # [1, F, 3, 4]
         background_sphere_colors = nn.Parameter(torch.rand(1, self.env_sphere.faces.shape[0], 3, 4).fill_(0.0).cuda())
 
+        print(f"size of background_sphere_colors = {background_sphere_colors.size()}")
+
         # inverse linear approx to find latent
         A = self.linear_rgb_estimator.T
         regularizer = 1e-2
         init_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
             list(init_rgb_color)).float().to(A.device)
+        
+        print(f"size of init_color_in_latent = {init_color_in_latent.size()}")
+
         
         # init_background_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
         #     list(init_background_rgb_color)).float().to(A.device)
@@ -81,8 +86,11 @@ class TexturedMeshModel(nn.Module):
         texture_img = nn.Parameter(
             init_color_in_latent[None, :, None, None] * 0.3 + 0.4 * torch.randn(1, 4, self.texture_resolution,
                                                                                 self.texture_resolution).cuda())
+        print(f"size of texture_img = {texture_img.size()}")
+
 
         # used only for latent-paint fine-tuning, values set when reading previous checkpoint statedict
+        # [1, 3, R, R]
         texture_img_rgb_finetune = nn.Parameter(torch.zeros(1, 3,
                                                             self.texture_resolution, self.texture_resolution).cuda())
 
