@@ -20,8 +20,6 @@ def side_poses(size, device, radius_range=(1.0, 1.5), theta_range=(0.0, 150.0), 
     # all dirs are 1 (side-view)
     dirs = torch.fill(thetas.shape[0], 1, dtype=torch.long)
 
-    torch.ones()
-
     return dirs, thetas.item(), phis.item(), radius.item()
 
 def rand_poses(size, device, radius_range=(1.0, 1.5), theta_range=(0.0, 150.0), phi_range=(0.0, 360.0),
@@ -92,7 +90,7 @@ class ViewsDataset:
                                                       angle_overhead=self.cfg.angle_overhead,
                                                       angle_front=self.cfg.angle_front)
 
-        print("dirs = {dirs}")
+        print(dirs)
 
         data = {
             'dir': dirs,
