@@ -28,6 +28,7 @@ class StableDiffusion(nn.Module):
 
         self.device = device
         self.latent_mode = latent_mode
+        # ian: ?? noise step?
         self.num_train_timesteps = 1000
         self.min_step = int(self.num_train_timesteps * 0.02)
         self.max_step = int(self.num_train_timesteps * 0.98)

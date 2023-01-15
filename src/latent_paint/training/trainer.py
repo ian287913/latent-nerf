@@ -123,16 +123,19 @@ class Trainer:
             for data in self.dataloaders['train']:
                 self.train_step += 1
                 pbar.update(1)
-
+                # ian: reset gradient
                 self.optimizer.zero_grad()
-
+                # ian: render image and send to diffusion to calculate the loss
+                # ian: is "pred_rgbs" rendered image or diffused image?
                 pred_rgbs, loss = self.train_render(data)
-
+                # ian: optimize according to the render
+                # ian: how to calc the gradient? where are the parameters??
                 self.optimizer.step()
 
                 if self.train_step % self.cfg.log.save_interval == 0:
                     self.save_checkpoint(full=True)
                     self.evaluate(self.dataloaders['val'], self.eval_renders_path)
+                    # ian: set model to train mode
                     self.mesh_model.train()
 
                 if np.random.uniform(0, 1) < 0.05:
@@ -143,15 +146,18 @@ class Trainer:
         self.full_eval()
         logger.info('\tDone!')
 
+    # ian: render frames with different perspectives imported from dataloader
+    # ian: save rendered scenes and a texture of the mesh
     def evaluate(self, dataloader: DataLoader, save_path: Path, save_as_video: bool = False):
         logger.info(f'Evaluating and saving model, iteration #{self.train_step}...')
+        # ian: set model to eval mode
         self.mesh_model.eval()
         save_path.mkdir(exist_ok=True)
 
         if save_as_video:
             all_preds = []
         for i, data in enumerate(dataloader):
-            # render a frame according to the camera settings(data)
+            # ian: render a frame according to the camera settings(data)
             # what is textures??
             preds, textures = self.eval_render(data)
 
@@ -205,6 +211,7 @@ class Trainer:
         else:
             text_z = self.text_z
 
+        # ian: IMPORTANT
         # Guidance loss
         loss_guidance = self.diffusion.train_step(text_z, pred_rgb)
         loss = loss_guidance
