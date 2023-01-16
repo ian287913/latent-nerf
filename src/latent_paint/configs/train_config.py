@@ -43,7 +43,7 @@ class GuideConfig:
     # height of mesh
     dy: float = 0.25
     # texture image resolution
-    texture_resolution=128
+    texture_resolution: int = 128
     # texture mapping interpolation mode from texture image, options: 'nearest', 'bilinear', 'bicubic'
     texture_interpolation_mode: str= 'nearest'
 
