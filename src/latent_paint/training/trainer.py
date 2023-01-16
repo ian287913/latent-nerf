@@ -42,6 +42,8 @@ class Trainer:
         self.mesh_model = self.init_mesh_model()
         self.diffusion = self.init_diffusion()
         self.text_z = self.calc_text_embeddings()
+        self.text_z_side = self.calc_side_only_text_embeddings()
+        
         self.optimizer = self.init_optimizer()
         self.dataloaders = self.init_dataloaders()
 
@@ -89,6 +91,13 @@ class Trainer:
                 text = f"{ref_text}, {d} view"
                 text_z.append(self.diffusion.get_text_embeds([text]))
         return text_z
+    
+    # ian: calculate
+    def calc_side_only_text_embeddings(self) -> Union[torch.Tensor, List[torch.Tensor]]:
+        ref_text = self.cfg.guide.text
+        text = f"{ref_text}, (side view)"
+        text_z_side = self.diffusion.get_text_embeds([text])
+        return text_z_side
 
     def init_optimizer(self) -> Optimizer:
         optimizer = torch.optim.Adam(self.mesh_model.get_params(), lr=self.cfg.optim.lr, betas=(0.9, 0.99), eps=1e-15)
@@ -204,9 +213,11 @@ class Trainer:
 
         outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius)
         pred_rgb = outputs['image']
-
+        
         # text embeddings
-        if self.cfg.guide.append_direction:
+        if self.cfg.guide.side_direction_only:
+            text_z = self.text_z_side
+        elif self.cfg.guide.append_direction:
             dirs = data['dir']  # [B,]
             text_z = self.text_z[dirs]
         else:

@@ -1,9 +1,10 @@
 log:
-  exp_name: 'custom_goldfish_12_256textureRes_highTrainRes_highEvalRes_morePrompt_fixeddir_blueredinit'
+  exp_name: 'custom_goldfish_14_128textureRes_twoPhaseDir_blueRedInit_3000fix3000free'
   save_interval: 500
 guide:
-  text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp, (blue background), (side view)'
+  text: '((a photo of a living goldfish)), specimen, intricate, high detail, Sharp, (blue background)'
   shape_path: experiments/resources/example_output_goldfish.obj
+  side_direction_only: True
   append_direction: False
   texture_resolution: 128
 render:
@@ -13,4 +14,5 @@ render:
   theta_range: [80, 100]
   phi_range: [-10, 10]
 optim:
-  iters: 5000
+  iters: 3000
+  resume: False

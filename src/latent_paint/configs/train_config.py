@@ -32,6 +32,9 @@ class GuideConfig:
     text: str
     # The mesh to paint
     shape_path: str
+
+    # ian: force side direction (WILL override append_direction)
+    side_direction_only: bool = False
     # Append direction to text prompts
     append_direction: bool = True
     # A Textual-Inversion concept to use
