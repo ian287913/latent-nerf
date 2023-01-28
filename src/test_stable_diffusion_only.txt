@@ -1,0 +1,2 @@
+activate kaolin
+python stable_diffusion.py

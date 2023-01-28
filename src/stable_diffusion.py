@@ -249,7 +249,10 @@ if __name__ == '__main__':
     parser.add_argument('prompt', type=str)
     parser.add_argument('-H', type=int, default=512)
     parser.add_argument('-W', type=int, default=512)
-    parser.add_argument('--steps', type=int, default=50)
+    # steps
+    parser.add_argument('--S', type=int, default=50)
+    # batch
+    parser.add_argument('--B', type=int, default=1)
     opt = parser.parse_args()
 
     device = torch.device('cuda')
@@ -260,10 +263,12 @@ if __name__ == '__main__':
     end_time = time.time()
     print('initialize StableDiffusion cost', end_time - start_time, 'seconds')
 
-    imgs = sd.prompt_to_img(opt.prompt, opt.H, opt.W, opt.steps)
+    for b in range(0, opt.B):
+        imgs = sd.prompt_to_img(opt.prompt, opt.H, opt.W, opt.S)
+        print(b, ' of ', opt.B, ' images are generated', flush=True)
+        plt.imshow(imgs[0])
 
     # visualize image
-    plt.imshow(imgs[0])
     plt.show()
 
 
