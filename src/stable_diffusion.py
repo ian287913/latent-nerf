@@ -263,20 +263,18 @@ if __name__ == '__main__':
     end_time = time.time()
     print('initialize StableDiffusion cost', end_time - start_time, 'seconds')
 
-    imgarr = []
     for b in range(0, opt.B):
         imgs = sd.prompt_to_img(opt.prompt, opt.H, opt.W, opt.S)
         print(b, ' of ', opt.B, ' images are generated', flush=True)
-        imgarr.append(imgs[0])
+        # visualize image
+        plt.figure()
+        plt.imshow(imgs[0])
+        plt.show(block=False)
 
-    plt.figure()
-    f, axarr = plt.subplots(opt.B, 1)
-    for b in range(0, opt.B):
-        axarr[b].imshow(imgarr[b])
-
-    #plt.imshow(imgs[0])
-    # visualize image
-    plt.show()
+    # close image
+    input("Press Enter to close all plots...")
+    plt.close('all')
+    print('all plots are closed.', flush=True)
 
 
 
