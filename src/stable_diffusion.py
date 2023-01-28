@@ -263,11 +263,18 @@ if __name__ == '__main__':
     end_time = time.time()
     print('initialize StableDiffusion cost', end_time - start_time, 'seconds')
 
+    imgarr = [opt.B]
     for b in range(0, opt.B):
         imgs = sd.prompt_to_img(opt.prompt, opt.H, opt.W, opt.S)
         print(b, ' of ', opt.B, ' images are generated', flush=True)
-        plt.imshow(imgs[0])
+        imgarr[b] = imgs[0]
 
+    plt.figure()
+    f, axarr = plt.subplot(opt.B, 1)
+    for b in range(0, opt.B):
+        axarr[b].imshow(imgarr[b])
+
+    #plt.imshow(imgs[0])
     # visualize image
     plt.show()
 
