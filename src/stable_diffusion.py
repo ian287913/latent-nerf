@@ -270,7 +270,7 @@ if __name__ == '__main__':
         imgarr.append(imgs[0])
 
     plt.figure()
-    f, axarr = plt.subplot(opt.B, 1)
+    f, axarr = plt.subplots(opt.B, 1)
     for b in range(0, opt.B):
         axarr[b].imshow(imgarr[b])
 
