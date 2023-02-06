@@ -1,2 +1,5 @@
 activate kaolin
 python stable_diffusion.py
+
+python stable_diffusion.py "((a photo of a living goldfish)), (full body), specimen, black background, side view, intricate, high detail, Sharp, centered" --S 100 --B 20
+python stable_diffusion.py "a front-side view specimen of Carassius auratus auratus, encyclopedia, black background, full body shot, scientific, intricate, realistic, super detailed, photography, centered" --S 200 --B 20

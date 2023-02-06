@@ -241,7 +241,11 @@ if __name__ == '__main__':
 
     import argparse
     import matplotlib.pyplot as plt
-
+    from PIL import Image
+    import numpy as np
+    from utils import make_path, tensor2numpy
+    from pathlib import Path
+    from datetime import datetime
     # import os
     # os.environ["PYTORCH_CUDA_ALLOC_CONF"] = 'max_split_size_mb:32'
 
@@ -258,6 +262,13 @@ if __name__ == '__main__':
     device = torch.device('cuda')
     #device = torch.device('cpu')
 
+    save_path = make_path(Path('generatedResults') / datetime.now().strftime("%Y%m%d_%H%M%S"))
+    
+    f = open(save_path / 'parameters.txt', 'w')
+    print(vars(opt), file=f)
+    f.write('hello')
+    f.close()
+
     start_time = time.time()
     sd = StableDiffusion(device)
     end_time = time.time()
@@ -266,13 +277,18 @@ if __name__ == '__main__':
     for b in range(0, opt.B):
         imgs = sd.prompt_to_img(opt.prompt, opt.H, opt.W, opt.S)
         print(b, ' of ', opt.B, ' images are generated', flush=True)
+
+        Image.fromarray(imgs[0]).save(save_path / f"{b}.png")
+
         # visualize image
-        plt.figure()
-        plt.imshow(imgs[0])
-        plt.show(block=False)
+        # plt.figure()
+        # plt.imshow(imgs[0])
+        # plt.show(block=False)
 
     # close image
-    input("Press Enter to close all plots...")
+    # plt.show(block=False)
+    input(f"All images are saved to:\n{save_path.absolute()}\nPress Enter to close all plots...")
+    
     plt.close('all')
     print('all plots are closed.', flush=True)
 
