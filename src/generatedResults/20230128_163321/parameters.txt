@@ -1,0 +1,2 @@
+{'prompt': 'a front-side view specimen of goldfish, Carassius auratus, encyclopedia, black background, full body shot, scientific, intricate, realistic, super detailed, photography, centered', 'H': 512, 'W': 512, 'S': 600, 'B': 20}
+hello
