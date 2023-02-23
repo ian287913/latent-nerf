@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from src.latent_paint.configs.train_config import RenderConfig
+from src.dibr_optimize.configs.train_config import RenderConfig
 from src.utils import get_view_direction
 
 # ian: i only want side-view fish!

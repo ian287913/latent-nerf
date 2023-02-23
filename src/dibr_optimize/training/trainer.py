@@ -15,8 +15,8 @@ import torch.nn.functional as F
 from tqdm import tqdm
 
 from src import utils
-from src.latent_paint.configs.train_config import TrainConfig
-from src.latent_paint.training.views_dataset import ViewsDataset
+from src.dibr_optimize.configs.train_config import TrainConfig
+from src.dibr_optimize.training.views_dataset import ViewsDataset
 from src.stable_diffusion import StableDiffusion
 from src.utils import make_path, tensor2numpy
 
@@ -56,20 +56,14 @@ class Trainer:
         logger.info(f'Successfully initialized {self.cfg.log.exp_name}')
 
     def init_mesh_model(self) -> nn.Module:
-        if self.cfg.render.backbone == 'texture-mesh':
-            from src.latent_paint.models.textured_mesh import TexturedMeshModel
-            model = TexturedMeshModel(self.cfg, device=self.device, render_grid_size=self.cfg.render.train_grid_size,
-                                      latent_mode=True, texture_resolution=self.cfg.guide.texture_resolution).to(self.device)
-        elif self.cfg.render.backbone == 'texture-rgb-mesh':
-            from src.latent_paint.models.textured_mesh import TexturedMeshModel
-            model = TexturedMeshModel(self.cfg, device=self.device, render_grid_size=self.cfg.render.train_grid_size,
-                                      latent_mode=False, texture_resolution=self.cfg.guide.texture_resolution).to(self.device)
-        else:
-            raise NotImplementedError(f'--backbone {self.cfg.render.backbone} is not implemented!')
+        ##if self.cfg.render.backbone == 'texture-rgb-mesh':
+        from src.dibr_optimize.models.textured_mesh import TexturedMeshModel
+        model = TexturedMeshModel(self.cfg, device=self.device, render_grid_size=self.cfg.render.train_grid_size,
+                                    latent_mode=False, texture_resolution=self.cfg.guide.texture_resolution).to(self.device)
 
         model = model.to(self.device)
         logger.info(
-            f'Loaded {self.cfg.render.backbone} Mesh, #parameters: {sum([p.numel() for p in model.parameters() if p.requires_grad])}')
+            f'Loaded RGB Mesh, #parameters: {sum([p.numel() for p in model.parameters() if p.requires_grad])}')
         logger.info(model)
         return model
 

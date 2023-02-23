@@ -10,7 +10,7 @@ from PIL import Image
 
 from .mesh import Mesh
 from .render import Renderer
-from src.latent_paint.configs.train_config import TrainConfig
+from src.dibr_optimize.configs.train_config import TrainConfig
 
 
 class TexturedMeshModel(nn.Module):
