@@ -139,6 +139,7 @@ class Trainer:
                 pred_rgbs, loss = self.train_render(data)
                 # ian: optimize according to the render
                 # ian: how to calc the gradient? where are the parameters??
+                # ian: A: the parameters are defined in the constructor!
                 self.optimizer.step()
 
                 # ian: just save some stuff
