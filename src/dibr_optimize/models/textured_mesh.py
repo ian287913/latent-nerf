@@ -29,20 +29,20 @@ class TexturedMeshModel(nn.Module):
         self.mesh_scale = self.opt.guide.shape_scale
         self.texture_resolution = texture_resolution
 
-        # linear rgb estimator from latents
-        # https://discuss.huggingface.co/t/decoding-latents-to-rgb-without-upscaling/23204
-        self.linear_rgb_estimator = torch.tensor([
-            #   R       G       B
-            [0.298, 0.207, 0.208],  # L1
-            [0.187, 0.286, 0.173],  # L2
-            [-0.158, 0.189, 0.264],  # L3
-            [-0.184, -0.271, -0.473],  # L4
-        ]).to(self.device)
+        # # linear rgb estimator from latents
+        # # https://discuss.huggingface.co/t/decoding-latents-to-rgb-without-upscaling/23204
+        # self.linear_rgb_estimator = torch.tensor([
+        #     #   R       G       B
+        #     [0.298, 0.207, 0.208],  # L1
+        #     [0.187, 0.286, 0.173],  # L2
+        #     [-0.158, 0.189, 0.264],  # L3
+        #     [-0.184, -0.271, -0.473],  # L4
+        # ]).to(self.device)
 
         self.renderer = Renderer(device=self.device, dim=(render_grid_size, render_grid_size),
                                  interpolation_mode=self.opt.guide.texture_interpolation_mode)
         self.env_sphere, self.mesh = self.init_meshes()
-        self.background_sphere_colors, self.texture_img, self.texture_img_rgb_finetune = self.init_paint()
+        self.background_sphere_colors, self.texture_img = self.init_paint()
         self.vt, self.ft = self.init_texture_map()
 
         self.face_attributes = kal.ops.mesh.index_vertices_by_faces(
@@ -50,6 +50,7 @@ class TexturedMeshModel(nn.Module):
             self.ft.long()).detach()
 
     def init_meshes(self, env_sphere_path='shapes/env_sphere.obj'):
+        # TODO: check whether we need this sphere
         env_sphere = Mesh(env_sphere_path, self.device)
 
         mesh = Mesh(self.opt.guide.shape_path, self.device)
@@ -90,12 +91,12 @@ class TexturedMeshModel(nn.Module):
         print(f"size of texture_img = {texture_img.size()}")
 
 
-        # used only for latent-paint fine-tuning, values set when reading previous checkpoint statedict
-        # [1, 3, R, R]
-        texture_img_rgb_finetune = nn.Parameter(torch.zeros(1, 3,
-                                                            self.texture_resolution, self.texture_resolution).cuda())
+        # # used only for latent-paint fine-tuning, values set when reading previous checkpoint statedict
+        # # [1, 3, R, R]
+        # texture_img_rgb_finetune = nn.Parameter(torch.zeros(1, 3,
+        #                                                     self.texture_resolution, self.texture_resolution).cuda())
 
-        return background_sphere_colors, texture_img, texture_img_rgb_finetune
+        return background_sphere_colors, texture_img #, texture_img_rgb_finetune
 
     def init_texture_map(self):
         cache_path = self.opt.log.exp_dir
@@ -131,10 +132,11 @@ class TexturedMeshModel(nn.Module):
         raise NotImplementedError
 
     def get_params(self):
-        if self.latent_mode:
-            return [self.background_sphere_colors, self.texture_img]
-        else:
-            return [self.background_sphere_colors, self.texture_img_rgb_finetune]
+        return [self.background_sphere_colors, self.texture_img]
+        # if self.latent_mode:
+        #     return [self.background_sphere_colors, self.texture_img]
+        # else:
+        #     return [self.background_sphere_colors, self.texture_img_rgb_finetune]
 
     @torch.no_grad()
     def export_mesh(self, path, guidance=None):
@@ -146,10 +148,11 @@ class TexturedMeshModel(nn.Module):
         v_np = v.cpu().numpy()  # [N, 3]
         f_np = f.cpu().numpy()  # [M, 3]
 
-        if self.latent_mode:
-            colors = guidance.decode_latents(self.texture_img).permute(0, 2, 3, 1).contiguous()
-        else:
-            colors = self.texture_img_rgb_finetune.permute(0, 2, 3, 1).contiguous()
+        # if self.latent_mode:
+        #     colors = guidance.decode_latents(self.texture_img).permute(0, 2, 3, 1).contiguous()
+        # else:
+        #     colors = self.texture_img_rgb_finetune.permute(0, 2, 3, 1).contiguous()
+        colors = self.texture_img.permute(0, 2, 3, 1).contiguous()
 
         colors = colors[0].cpu().detach().numpy()
         colors = (colors * 255).astype(np.uint8)
@@ -204,12 +207,15 @@ class TexturedMeshModel(nn.Module):
             return self.render_train(theta, phi, radius)
 
     def render_train(self, theta, phi, radius):
-        if self.latent_mode:
-            texture_img = self.texture_img
-            background_sphere_colors = self.background_sphere_colors
-        else:
-            texture_img = self.texture_img_rgb_finetune
-            background_sphere_colors = self.background_sphere_colors @ self.linear_rgb_estimator
+        # TODO: make sure all colors are not in latent space
+        texture_img = self.texture_img
+        background_sphere_colors = self.background_sphere_colors
+        # if self.latent_mode:
+        #     texture_img = self.texture_img
+        #     background_sphere_colors = self.background_sphere_colors
+        # else:
+        #     texture_img = self.texture_img_rgb_finetune
+        #     background_sphere_colors = self.background_sphere_colors @ self.linear_rgb_estimator
 
         pred_features, mask = self.renderer.render_single_view_texture(self.mesh.vertices,
                                                                        self.mesh.faces,
@@ -230,20 +236,16 @@ class TexturedMeshModel(nn.Module):
         mask = mask.detach()
         pred_map = pred_back * (1 - mask) + pred_features * mask
 
-        if self.latent_mode and mask.shape[-1] != 64:
-            mask = F.interpolate(mask, (64, 64), mode='bicubic')
-            pred_back = F.interpolate(pred_back, (64, 64), mode='bicubic')
-            pred_features = F.interpolate(pred_features, (64, 64), mode='bicubic')
-            pred_map = F.interpolate(pred_map, (64, 64), mode='bicubic')
+        # if self.latent_mode and mask.shape[-1] != 64:
+        #     mask = F.interpolate(mask, (64, 64), mode='bicubic')
+        #     pred_back = F.interpolate(pred_back, (64, 64), mode='bicubic')
+        #     pred_features = F.interpolate(pred_features, (64, 64), mode='bicubic')
+        #     pred_map = F.interpolate(pred_map, (64, 64), mode='bicubic')
 
         return {'image': pred_map, 'mask': mask, 'background': pred_back, 'foreground': pred_features}
 
     def render_test(self, theta, phi, radius, decode_func=None, dims=None):
-        if self.latent_mode:
-            assert decode_func is not None, 'decode function was not supplied to decode the latent texture image'
-            texture_img = decode_func(self.texture_img)
-        else:
-            texture_img = self.texture_img_rgb_finetune
+        texture_img = self.texture_img
 
         pred_features, mask = self.renderer.render_single_view_texture(self.mesh.vertices,
                                                                        self.mesh.faces,

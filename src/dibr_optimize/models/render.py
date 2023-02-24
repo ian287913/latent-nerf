@@ -45,6 +45,7 @@ class Renderer:
         image_features, face_idx = kal.render.mesh.rasterize(dims[1], dims[0], face_vertices_camera[:, :, :, -1],
                                                               face_vertices_image, face_attributes)
 
+        # TODO: should this be alpha?
         mask = (face_idx > -1).float()[..., None]
 
         return image_features.permute(0, 3, 1, 2), mask.permute(0, 3, 1, 2)

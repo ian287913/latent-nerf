@@ -19,7 +19,7 @@ from src.dibr_optimize.configs.train_config import TrainConfig
 from src.dibr_optimize.training.views_dataset import ViewsDataset
 from src.stable_diffusion import StableDiffusion
 from src.utils import make_path, tensor2numpy
-
+from src.dibr_optimize.models.textured_mesh import TexturedMeshModel
 
 class Trainer:
     def __init__(self, cfg: TrainConfig):
@@ -40,7 +40,7 @@ class Trainer:
         pyrallis.dump(self.cfg, (self.exp_path / 'config.yaml').open('w'))
 
         self.mesh_model = self.init_mesh_model()
-        self.diffusion = self.init_diffusion()
+        ##self.diffusion = self.init_diffusion()
         self.text_z = self.calc_text_embeddings()
         self.text_z_side = self.calc_side_only_text_embeddings()
         
@@ -55,9 +55,8 @@ class Trainer:
 
         logger.info(f'Successfully initialized {self.cfg.log.exp_name}')
 
-    def init_mesh_model(self) -> nn.Module:
+    def init_mesh_model(self) -> TexturedMeshModel:
         ##if self.cfg.render.backbone == 'texture-rgb-mesh':
-        from src.dibr_optimize.models.textured_mesh import TexturedMeshModel
         model = TexturedMeshModel(self.cfg, device=self.device, render_grid_size=self.cfg.render.train_grid_size,
                                     latent_mode=False, texture_resolution=self.cfg.guide.texture_resolution).to(self.device)
 
@@ -67,31 +66,20 @@ class Trainer:
         logger.info(model)
         return model
 
-    def init_diffusion(self) -> StableDiffusion:
-        diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
-                                          concept_name=self.cfg.guide.concept_name,
-                                          latent_mode=self.mesh_model.latent_mode)
-        for p in diffusion_model.parameters():
-            p.requires_grad = False
-        return diffusion_model
-
-    def calc_text_embeddings(self) -> Union[torch.Tensor, List[torch.Tensor]]:
-        ref_text = self.cfg.guide.text
-        if not self.cfg.guide.append_direction:
-            text_z = self.diffusion.get_text_embeds([ref_text])
-        else:
-            text_z = []
-            for d in ['front', 'side', 'back', 'side', 'overhead', 'bottom']:
-                text = f"{ref_text}, {d} view"
-                text_z.append(self.diffusion.get_text_embeds([text]))
-        return text_z
+    # def init_diffusion(self) -> StableDiffusion:
+    #     diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
+    #                                       concept_name=self.cfg.guide.concept_name,
+    #                                       latent_mode=self.mesh_model.latent_mode)
+    #     for p in diffusion_model.parameters():
+    #         p.requires_grad = False
+    #     return diffusion_model
     
-    # ian: calculate
-    def calc_side_only_text_embeddings(self) -> Union[torch.Tensor, List[torch.Tensor]]:
-        ref_text = self.cfg.guide.text
-        text = f"{ref_text}, (side view)"
-        text_z_side = self.diffusion.get_text_embeds([text])
-        return text_z_side
+    # # ian: calculate
+    # def calc_side_only_text_embeddings(self) -> Union[torch.Tensor, List[torch.Tensor]]:
+    #     ref_text = self.cfg.guide.text
+    #     text = f"{ref_text}, (side view)"
+    #     text_z_side = self.diffusion.get_text_embeds([text])
+    #     return text_z_side
 
     def init_optimizer(self) -> Optimizer:
         optimizer = torch.optim.Adam(self.mesh_model.get_params(), lr=self.cfg.optim.lr, betas=(0.9, 0.99), eps=1e-15)
@@ -138,16 +126,18 @@ class Trainer:
 
                 # ian: just save some stuff
                 if self.train_step % self.cfg.log.save_interval == 0:
-                    self.save_checkpoint(full=True)
+                    ## self.save_checkpoint(full=True)
+                    # ian: render with multiple views with current texture. frames and texture are saved.
                     self.evaluate(self.dataloaders['val'], self.eval_renders_path)
                     # ian: set model to train mode
                     self.mesh_model.train()
-
-                if np.random.uniform(0, 1) < 0.05:
-                    # Randomly log rendered images throughout the training
+                    # ian: save the rendered image
                     self.log_train_renders(pred_rgbs)
+
+                
         logger.info('Finished Training ^_^')
         logger.info('Evaluating the last model...')
+        # ian: export mesh
         self.full_eval()
         logger.info('\tDone!')
 
@@ -159,31 +149,19 @@ class Trainer:
         self.mesh_model.eval()
         save_path.mkdir(exist_ok=True)
 
-        if save_as_video:
-            all_preds = []
         for i, data in enumerate(dataloader):
             # ian: render a frame according to the camera settings(data)
-            # what is textures??
+            # ian: preds = rendered frame, textures = the texture of the mesh
             preds, textures = self.eval_render(data)
 
             pred = tensor2numpy(preds[0])
 
-            if save_as_video:
-                all_preds.append(pred)
-            else:
-                Image.fromarray(pred).save(save_path / f"step_{self.train_step:05d}_{i:04d}_rgb.png")
+            Image.fromarray(pred).save(save_path / f"step_{self.train_step:05d}_{i:04d}_rgb.png")
 
         # Texture map is the same, so just take the last result
         texture = tensor2numpy(textures[0])
         Image.fromarray(texture).save(save_path / f"step_{self.train_step:05d}_texture.png")
 
-        if save_as_video:
-            all_preds = np.stack(all_preds, axis=0)
-
-            dump_vid = lambda video, name: imageio.mimsave(save_path / f"step_{self.train_step:05d}_{name}.mp4", video, fps=25,
-                                                           quality=8, macro_block_size=1)
-
-            dump_vid(all_preds, 'rgb')
         logger.info('Done!')
 
     def full_eval(self):
@@ -197,7 +175,7 @@ class Trainer:
             save_path = make_path(self.exp_path / 'mesh')
             logger.info(f"Saving mesh to {save_path}")
 
-            self.mesh_model.export_mesh(save_path, guidance=self.diffusion)
+            self.mesh_model.export_mesh(save_path)
 
             logger.info(f"\tDone!")
 
@@ -208,15 +186,6 @@ class Trainer:
 
         outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius)
         pred_rgb = outputs['image']
-        
-        # text embeddings
-        if self.cfg.guide.side_direction_only:
-            text_z = self.text_z_side
-        elif self.cfg.guide.append_direction:
-            dirs = data['dir']  # [B,]
-            text_z = self.text_z[dirs]
-        else:
-            text_z = self.text_z
 
         # ian: IMPORTANT
         # Guidance loss
@@ -238,10 +207,11 @@ class Trainer:
         return pred_rgb, texture_rgb
 
     def log_train_renders(self, preds: torch.Tensor):
-        if self.mesh_model.latent_mode:
-            pred_rgb = self.diffusion.decode_latents(preds).permute(0, 2, 3, 1).contiguous()  # [1, 3, H, W]
-        else:
-            pred_rgb = preds.permute(0, 2, 3, 1).contiguous().clamp(0, 1)
+        # if self.mesh_model.latent_mode:
+        #     pred_rgb = self.diffusion.decode_latents(preds).permute(0, 2, 3, 1).contiguous()  # [1, 3, H, W]
+        # else:
+        #     pred_rgb = preds.permute(0, 2, 3, 1).contiguous().clamp(0, 1)
+        pred_rgb = preds.permute(0, 2, 3, 1).contiguous().clamp(0, 1)   # [1, 3, H, W]
         save_path = self.train_renders_path / f'step_{self.train_step:05d}.jpg'
         save_path.parent.mkdir(exist_ok=True)
 
@@ -302,27 +272,27 @@ class Trainer:
             except:
                 logger.warning("Failed to load optimizer.")
 
-    def save_checkpoint(self, full=False):
+    # def save_checkpoint(self, full=False):
 
-        name = f'step_{self.train_step:06d}'
+    #     name = f'step_{self.train_step:06d}'
 
-        state = {
-            'train_step': self.train_step,
-            'checkpoints': self.past_checkpoints,
-        }
+    #     state = {
+    #         'train_step': self.train_step,
+    #         'checkpoints': self.past_checkpoints,
+    #     }
 
-        if full:
-            state['optimizer'] = self.optimizer.state_dict()
+    #     if full:
+    #         state['optimizer'] = self.optimizer.state_dict()
 
-        state['model'] = self.mesh_model.state_dict()
+    #     state['model'] = self.mesh_model.state_dict()
 
-        file_path = f"{name}.pth"
+    #     file_path = f"{name}.pth"
 
-        self.past_checkpoints.append(file_path)
+    #     self.past_checkpoints.append(file_path)
 
-        if len(self.past_checkpoints) > self.cfg.log.max_keep_ckpts:
-            old_ckpt = self.ckpt_path / self.past_checkpoints.pop(0)
-            print("Should delete file: ", old_ckpt, " but the unlink function is in python38")
-            ##old_ckpt.unlink(missing_ok=True)
+    #     if len(self.past_checkpoints) > self.cfg.log.max_keep_ckpts:
+    #         old_ckpt = self.ckpt_path / self.past_checkpoints.pop(0)
+    #         print("Should delete file: ", old_ckpt, " but the unlink function is in python38")
+    #         ##old_ckpt.unlink(missing_ok=True)
 
-        torch.save(state, self.ckpt_path / file_path)
+    #     torch.save(state, self.ckpt_path / file_path)
