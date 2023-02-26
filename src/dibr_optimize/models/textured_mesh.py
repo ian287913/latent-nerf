@@ -59,44 +59,20 @@ class TexturedMeshModel(nn.Module):
         return env_sphere, mesh
 
     def init_paint(self, init_rgb_color=(1.0, 0.0, 0.0), init_background_rgb_color=(0.0, 0.0, 1.0)):
-        # random color face attributes for background sphere
-        # [1, F, 3, 4]
-        #background_sphere_colors = nn.Parameter(torch.rand(1, self.env_sphere.faces.shape[0], 3, 4).fill_(0.0).cuda())
-
-
-        # inverse linear approx to find latent
-        A = self.linear_rgb_estimator.T
-        regularizer = 1e-2
-        init_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
-            list(init_rgb_color)).float().to(A.device)
         
-        print(f"size of init_color_in_latent = {init_color_in_latent.size()}")
-
-        
-        init_background_color_in_latent = (torch.pinverse(A.T @ A + regularizer * torch.eye(4).cuda()) @ A.T) @ torch.tensor(
-            list(init_background_rgb_color)).float().to(A.device)
-        print(f"size of init_background_color_in_latent = {init_background_color_in_latent.size()}")
-
-        print(f"init bg value in latent = {init_background_color_in_latent}")
-        # ian: init background_sphere_colors as all black
+        # [1, Face count, 3(triangle), 3(rgb)]
         background_sphere_colors = nn.Parameter(
-            init_background_color_in_latent[None, None, None, :] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 4).cuda())
+            init_background_rgb_color[None, None, None, :] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 3).cuda())
         print(f"size of background_sphere_colors = {background_sphere_colors.size()}")
 
         # init colors with target latent plus some noise
-        # [1, 4, R, R]
+        # [1, 3, R, R]
         texture_img = nn.Parameter(
-            init_color_in_latent[None, :, None, None] * 0.3 + 0.4 * torch.randn(1, 4, self.texture_resolution,
+            init_rgb_color[None, :, None, None] * 0.99 + 0.01 * torch.randn(1, 3, self.texture_resolution,
                                                                                 self.texture_resolution).cuda())
         print(f"size of texture_img = {texture_img.size()}")
 
-
-        # # used only for latent-paint fine-tuning, values set when reading previous checkpoint statedict
-        # # [1, 3, R, R]
-        # texture_img_rgb_finetune = nn.Parameter(torch.zeros(1, 3,
-        #                                                     self.texture_resolution, self.texture_resolution).cuda())
-
-        return background_sphere_colors, texture_img #, texture_img_rgb_finetune
+        return background_sphere_colors, texture_img
 
     def init_texture_map(self):
         cache_path = self.opt.log.exp_dir
