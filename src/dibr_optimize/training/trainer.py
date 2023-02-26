@@ -72,7 +72,7 @@ class Trainer:
         import torchvision
         from torchvision.io import read_image
         import torchvision.transforms as T
-        loaded_image = read_image(self.cfg.guide.gt_image_path)
+        loaded_image = read_image(self.cfg.guide.gt_image_path).to(self.device)
         print(f"gt_image.size = {loaded_image.size()}")
         return loaded_image
 
