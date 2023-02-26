@@ -7,13 +7,13 @@ guide:
   gt_image_path: experiments/resources/target_image_goldfish.png
   side_direction_only: False
   append_direction: True
-  texture_resolution: 128
+  texture_resolution: 256
 render:
-  train_grid_size: 1024
-  eval_grid_size: 1024
+  train_grid_size: 512
+  eval_grid_size: 512
   radius_range: [0.6, 1.0]
   # theta_range: [80, 100]
   # phi_range: [-10, 10]
 optim:
-  iters: 4000
+  iters: 2000
   resume: True

@@ -73,8 +73,12 @@ class Trainer:
         import torchvision
         from torchvision.io import read_image
         import torchvision.transforms as T
-        loaded_image = read_image(self.cfg.guide.gt_image_path).to(self.device)
-        print(f"gt_image.size = {loaded_image.size()}")
+        loaded_image = read_image(self.cfg.guide.gt_image_path)
+        print(f"before gt_image.size = {loaded_image.size()}")
+        loaded_image = loaded_image[None, :].to(self.device)
+        print(f"after gt_image.size = {loaded_image.size()}")
+        img = T.ToPILImage()(loaded_image[0])
+        img.show()
         return loaded_image
 
     # def init_diffusion(self) -> StableDiffusion:
@@ -213,11 +217,8 @@ class Trainer:
         # interp to 512x512 to be fed into vae.
         latents = inputs
         print(f"\nlatents.size() = {latents.size()}\n", flush=True)
-        img = T.ToPILImage()(latents)
-        img.show()
-
-        img = T.ToPILImage()(self.gt_image)
-        img.show()
+        # # img = T.ToPILImage()(latents[0])
+        # # img.show()
 
         # w(t), alpha_t * sigma_t^2
         # w = (1 - self.alphas[t])
