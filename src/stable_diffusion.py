@@ -119,6 +119,7 @@ class StableDiffusion(nn.Module):
         else:
             latents = inputs
         print(f"latents.size() = {latents.size()}", flush=True)
+        print(f"latents.type = {type(latents)}", flush=True)
 
         # torch.cuda.synchronize(); print(f'[TIME] guiding: interp {time.time() - _t:.4f}s')
 

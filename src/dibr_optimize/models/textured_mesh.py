@@ -64,6 +64,7 @@ class TexturedMeshModel(nn.Module):
         background_sphere_colors = nn.Parameter(
             init_background_rgb_color[None, None, None, :] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 3).cuda())
         print(f"size of background_sphere_colors = {background_sphere_colors.size()}")
+        print(f"type of background_sphere_colors = {type(background_sphere_colors)}")
 
         # init colors with target latent plus some noise
         # [1, 3, R, R]
@@ -71,6 +72,7 @@ class TexturedMeshModel(nn.Module):
             init_rgb_color[None, :, None, None] * 0.99 + 0.01 * torch.randn(1, 3, self.texture_resolution,
                                                                                 self.texture_resolution).cuda())
         print(f"size of texture_img = {texture_img.size()}")
+        print(f"type of texture_img = {type(texture_img)}")
 
         return background_sphere_colors, texture_img
 
