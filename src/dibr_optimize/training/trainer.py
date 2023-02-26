@@ -41,6 +41,7 @@ class Trainer:
 
         self.mesh_model = self.init_mesh_model()
         ##self.diffusion = self.init_diffusion()
+        self.gt_image = self.init_gt_image()
         self.text_z = self.calc_text_embeddings()
         self.text_z_side = self.calc_side_only_text_embeddings()
         
@@ -65,6 +66,10 @@ class Trainer:
             f'Loaded RGB Mesh, #parameters: {sum([p.numel() for p in model.parameters() if p.requires_grad])}')
         logger.info(model)
         return model
+
+    def init_gt_image():
+        loaded_image
+        return loaded_image
 
     # def init_diffusion(self) -> StableDiffusion:
     #     diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
@@ -191,10 +196,32 @@ class Trainer:
 
         # ian: IMPORTANT
         # Guidance loss
-        loss_guidance = self.diffusion.train_step(text_z, pred_rgb)
+        loss_guidance = self.train_step(pred_rgb)
         loss = loss_guidance
 
         return pred_rgb, loss
+
+    # ian: implement our loss calculation instead of using diffusion.train_step()
+    def train_step(self, inputs, guidance_scale=100):
+        
+        # interp to 512x512 to be fed into vae.
+        latents = inputs
+        print(f"\nlatents.size() = {latents.size()}\n", flush=True)
+
+        # w(t), alpha_t * sigma_t^2
+        # w = (1 - self.alphas[t])
+        ##w = self.alphas[t] ** 0.5 * (1 - self.alphas[t])
+        w = 1.0
+        grad = w * (latents - self.gt_image)
+        # (latent version)ian: grad.size() = [1, 4, 64, 64]
+
+        # clip grad for stable training?
+        # grad = grad.clamp(-1, 1)
+
+        # manually backward, since we omitted an item in grad and cannot simply autodiff.
+        latents.backward(gradient=grad, retain_graph=True)
+
+        return 0 # dummy loss value
 
     def eval_render(self, data):
         theta = data['theta']
