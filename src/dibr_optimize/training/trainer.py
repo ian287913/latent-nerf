@@ -187,6 +187,8 @@ class Trainer:
         outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius)
         pred_rgb = outputs['image']
 
+        print(f"size of pred_rgb = {pred_rgb.size()}")
+
         # ian: IMPORTANT
         # Guidance loss
         loss_guidance = self.diffusion.train_step(text_z, pred_rgb)

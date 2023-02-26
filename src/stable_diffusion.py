@@ -148,6 +148,8 @@ class StableDiffusion(nn.Module):
         w = self.alphas[t] ** 0.5 * (1 - self.alphas[t])
         grad = w * (noise_pred - noise)
 
+        print(f"grad.size = {grad.size()}")
+
         # clip grad for stable training?
         # grad = grad.clamp(-1, 1)
 
