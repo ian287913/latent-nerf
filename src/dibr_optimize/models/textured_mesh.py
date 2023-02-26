@@ -59,7 +59,9 @@ class TexturedMeshModel(nn.Module):
         return env_sphere, mesh
 
     def init_paint(self, init_rgb_color=(1.0, 0.0, 0.0), init_background_rgb_color=(0.0, 0.0, 1.0)):
-        
+        init_rgb_color = init_rgb_color.float().to(self.device)
+        init_background_rgb_color = init_background_rgb_color.float().to(self.device)
+
         # [1, Face count, 3(triangle), 3(rgb)]
         background_sphere_colors = nn.Parameter(
             init_background_rgb_color[None, None, None, :] * 1.0 + 1.0 * torch.zeros(1, self.env_sphere.faces.shape[0], 3, 3).cuda())
