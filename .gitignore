@@ -1,6 +1,5 @@
 **/.ipynb_checkpoints
 **/__pycache__
-*.png
 *.mp4
 *.npy
 *.npz
@@ -9,4 +8,5 @@ data/*
 logs/*
 .idea
 experiments/*
-!experiments/resources/*
+src/generatedResults/*
+!experiments/resources

@@ -1,6 +1,10 @@
 python -m scripts.train_latent_paint --config_path demo_configs/latent_paint/custom_goldfish.yaml
 python -m scripts.train_latent_paint --config_path demo_configs/latent_paint/goldfish.yaml
 
+# dibr:
+python -m scripts.dibr_optimization --config_path demo_configs/dibr_optimize/custom_goldfish.yaml
+
+
 pip path:
 gamelab ian:
 C:\Users\ian28\anaconda3\envs\kaolin\Scripts\pip
