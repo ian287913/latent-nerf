@@ -42,8 +42,8 @@ class Trainer:
         self.mesh_model = self.init_mesh_model()
         ##self.diffusion = self.init_diffusion()
         self.gt_image = self.init_gt_image()
-        self.text_z = self.calc_text_embeddings()
-        self.text_z_side = self.calc_side_only_text_embeddings()
+        ##self.text_z = self.calc_text_embeddings()
+        ##self.text_z_side = self.calc_side_only_text_embeddings()
         
         self.optimizer = self.init_optimizer()
         self.dataloaders = self.init_dataloaders()
