@@ -12,6 +12,7 @@ from torch import nn
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
+import torchvision.transforms as T
 from tqdm import tqdm
 
 from src import utils
@@ -212,6 +213,11 @@ class Trainer:
         # interp to 512x512 to be fed into vae.
         latents = inputs
         print(f"\nlatents.size() = {latents.size()}\n", flush=True)
+        img = T.ToPILImage()(latents)
+        img.show()
+
+        img = T.ToPILImage()(self.gt_image)
+        img.show()
 
         # w(t), alpha_t * sigma_t^2
         # w = (1 - self.alphas[t])
