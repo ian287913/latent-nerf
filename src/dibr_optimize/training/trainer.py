@@ -201,13 +201,13 @@ class Trainer:
 
         # ian: IMPORTANT
         # Guidance loss
-        loss_guidance = self.train_step(pred_rgb)
+        loss_guidance = self.train_step_loss(pred_rgb)
         loss = loss_guidance
 
         return pred_rgb, loss
 
     # ian: implement our loss calculation instead of using diffusion.train_step()
-    def train_step(self, inputs, guidance_scale=100):
+    def train_step_loss(self, inputs, guidance_scale=100):
         
         # interp to 512x512 to be fed into vae.
         latents = inputs

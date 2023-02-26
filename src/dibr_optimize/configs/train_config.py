@@ -35,6 +35,9 @@ class GuideConfig:
 
     # ian: force side direction (WILL override append_direction)
     side_direction_only: bool = False
+    # ian: target image to optimize the texture
+    gt_image_path: str = ''
+
     # Append direction to text prompts
     append_direction: bool = True
     # A Textual-Inversion concept to use
