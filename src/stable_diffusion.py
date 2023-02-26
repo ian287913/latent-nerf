@@ -118,6 +118,8 @@ class StableDiffusion(nn.Module):
             latents = self.encode_imgs(pred_rgb_512)
         else:
             latents = inputs
+        print(f"latents.size() = {latents.size()}", flush=True)
+
         # torch.cuda.synchronize(); print(f'[TIME] guiding: interp {time.time() - _t:.4f}s')
 
         # timestep ~ U(0.02, 0.98) to avoid very high/low noise level
@@ -147,8 +149,7 @@ class StableDiffusion(nn.Module):
         # w = (1 - self.alphas[t])
         w = self.alphas[t] ** 0.5 * (1 - self.alphas[t])
         grad = w * (noise_pred - noise)
-
-        print(f"grad.size = {grad.size()}")
+        # ian: grad.size() = [1, 4, 64, 64]
 
         # clip grad for stable training?
         # grad = grad.clamp(-1, 1)
