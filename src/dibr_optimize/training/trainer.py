@@ -67,8 +67,13 @@ class Trainer:
         logger.info(model)
         return model
 
-    def init_gt_image():
-        loaded_image
+    def init_gt_image(self) -> torch.Tensor:
+        import torch
+        import torchvision
+        from torchvision.io import read_image
+        import torchvision.transforms as T
+        loaded_image = read_image(self.cfg.guide.gt_image_path)
+        print(f"gt_image.size = {loaded_image.size()}")
         return loaded_image
 
     # def init_diffusion(self) -> StableDiffusion:
