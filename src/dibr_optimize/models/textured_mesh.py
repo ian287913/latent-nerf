@@ -181,9 +181,9 @@ class TexturedMeshModel(nn.Module):
             fp.write(f'Ns 0.000000 \n')
             fp.write(f'map_Kd {name}albedo.png \n')
 
-    def render(self, theta, phi, radius, decode_func=None, test=False, dims=None):
+    def render(self, theta, phi, radius, test=False, dims=None):
         if test:
-            return self.render_test(theta, phi, radius, decode_func, dims=dims)
+            return self.render_test(theta, phi, radius, dims=dims)
         else:
             return self.render_train(theta, phi, radius)
 
@@ -225,7 +225,7 @@ class TexturedMeshModel(nn.Module):
 
         return {'image': pred_map, 'mask': mask, 'background': pred_back, 'foreground': pred_features}
 
-    def render_test(self, theta, phi, radius, decode_func=None, dims=None):
+    def render_test(self, theta, phi, radius, dims=None):
         texture_img = self.texture_img
 
         pred_features, mask = self.renderer.render_single_view_texture(self.mesh.vertices,

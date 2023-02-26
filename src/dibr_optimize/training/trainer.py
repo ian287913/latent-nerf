@@ -233,7 +233,7 @@ class Trainer:
         phi = data['phi']
         radius = data['radius']
         dim = self.cfg.render.eval_grid_size
-        outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius, decode_func=self.diffusion.decode_latents,
+        outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius,
                                          test=True ,dims=(dim,dim))
         pred_rgb = outputs['image'].permute(0, 2, 3, 1).contiguous().clamp(0, 1)
         texture_rgb = outputs['texture_map'].permute(0, 2, 3, 1).contiguous().clamp(0, 1)
