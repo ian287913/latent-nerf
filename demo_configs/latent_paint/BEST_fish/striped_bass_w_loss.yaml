@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_striped_bass_w_loss'
+guide:
+  text: 'a striped bass'
+  shape_path: shapes/blub.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

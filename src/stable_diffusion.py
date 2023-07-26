@@ -107,7 +107,7 @@ class StableDiffusion(nn.Module):
         return text_embeddings
 
 
-    def train_step(self, text_embeddings, inputs, guidance_scale=100):
+    def train_step(self, text_embeddings, inputs, guidance_scale=100, loss_history=None):
         
         # interp to 512x512 to be fed into vae.
 
@@ -151,12 +151,72 @@ class StableDiffusion(nn.Module):
         # clip grad for stable training?
         # grad = grad.clamp(-1, 1)
 
+        if (loss_history is not None):
+            loss_1d = grad.clone().abs().sum()
+            ##print(f"loss_1d.shape = {loss_1d.shape}")
+            ##print(f"loss_1d = {loss_1d}")
+            loss_history.append(loss_1d)
+
         # manually backward, since we omitted an item in grad and cannot simply autodiff.
         # _t = time.time()
         latents.backward(gradient=grad, retain_graph=True)
         # torch.cuda.synchronize(); print(f'[TIME] guiding: backward {time.time() - _t:.4f}s')
 
         return 0 # dummy loss value
+
+    def calc_loss(self, text_embeddings, inputs, guidance_scale=100, loss_history=None):
+        
+        # interp to 512x512 to be fed into vae.
+
+        # _t = time.time()
+        if not self.latent_mode:
+        # latents = F.interpolate(latents, (64, 64), mode='bilinear', align_corners=False)
+            pred_rgb_512 = F.interpolate(inputs, (512, 512), mode='bilinear', align_corners=False)
+            latents = self.encode_imgs(pred_rgb_512)
+        else:
+            latents = inputs
+        # torch.cuda.synchronize(); print(f'[TIME] guiding: interp {time.time() - _t:.4f}s')
+
+        # timestep ~ U(0.02, 0.98) to avoid very high/low noise level
+        t = torch.randint(self.min_step, self.max_step + 1, [1], dtype=torch.long, device=self.device)
+
+        # encode image into latents with vae, requires grad!
+        # _t = time.time()
+
+        # torch.cuda.synchronize(); print(f'[TIME] guiding: vae enc {time.time() - _t:.4f}s')
+
+        # predict the noise residual with unet, NO grad!
+        # _t = time.time()
+        with torch.no_grad():
+            # add noise
+            noise = torch.randn_like(latents)
+            latents_noisy = self.scheduler.add_noise(latents, noise, t)
+            # pred noise
+            latent_model_input = torch.cat([latents_noisy] * 2)
+            noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=text_embeddings).sample
+        # torch.cuda.synchronize(); print(f'[TIME] guiding: unet {time.time() - _t:.4f}s')
+
+        # perform guidance (high scale from paper!)
+        noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+        noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+
+        # w(t), alpha_t * sigma_t^2
+        # w = (1 - self.alphas[t])
+        w = self.alphas[t] ** 0.5 * (1 - self.alphas[t])
+        grad = w * (noise_pred - noise)
+
+        # clip grad for stable training?
+        # grad = grad.clamp(-1, 1)
+
+        if (loss_history is not None):
+            loss_1d = grad.clone().abs().sum()
+            print(f"\nloss_1d.shape = {loss_1d.shape}")
+            print(f"\n\nloss_1d = {loss_1d}")
+            loss_history.append(loss_1d)
+
+        # manually backward, since we omitted an item in grad and cannot simply autodiff.
+        # _t = time.time()
+        # torch.cuda.synchronize(); print(f'[TIME] guiding: backward {time.time() - _t:.4f}s')
 
     def produce_latents(self, text_embeddings, height=512, width=512, num_inference_steps=50, guidance_scale=7.5, latents=None):
 

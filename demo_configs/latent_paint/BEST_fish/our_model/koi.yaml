@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_koi_OURS'
+guide:
+  text: 'a koi'
+  shape_path: shapes/koi/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

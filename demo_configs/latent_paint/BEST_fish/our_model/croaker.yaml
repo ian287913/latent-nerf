@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_croaker_OURS'
+guide:
+  text: 'a croaker'
+  shape_path: shapes/croaker/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

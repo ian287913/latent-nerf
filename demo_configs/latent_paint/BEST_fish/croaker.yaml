@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_croaker'
+guide:
+  text: 'a croaker'
+  shape_path: shapes/blub.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

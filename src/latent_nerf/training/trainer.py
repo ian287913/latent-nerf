@@ -155,7 +155,8 @@ class Trainer:
                     self.log_train_renders(pred_rgbs)
         logger.info('Finished Training ^_^')
         logger.info('Evaluating the last model...')
-        self.full_eval()
+        ##self.full_eval()
+        logger.info('ian: full_eval() is skipped')
         logger.info('\tDone!')
 
     def evaluate(self, dataloader: DataLoader, save_path: Path, save_as_video: bool = False):
@@ -373,6 +374,6 @@ class Trainer:
 
         if len(self.past_checkpoints) > self.cfg.log.max_keep_ckpts:
             old_ckpt = self.ckpt_path / self.past_checkpoints.pop(0)
-            old_ckpt.unlink(missing_ok=True)
+            ##old_ckpt.unlink(missing_ok=True)
 
         torch.save(state, self.ckpt_path / file_path)

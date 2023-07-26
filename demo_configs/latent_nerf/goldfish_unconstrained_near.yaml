@@ -1,0 +1,10 @@
+log:
+  exp_name: 'goldfish_unconstrained_near'
+guide:
+  text: 'a goldfish'
+optim:
+  iters: 5000
+  seed: 10
+render:
+  nerf_type: 'latent'
+  radius_range: [0.75, 0.8]

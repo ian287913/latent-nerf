@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_regal_lue_tang_OURS'
+guide:
+  text: 'a regal blue tang'
+  shape_path: shapes/regal_blue_tang/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

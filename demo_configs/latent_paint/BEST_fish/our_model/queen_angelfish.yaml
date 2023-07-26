@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_queen_angelfish_OURS'
+guide:
+  text: 'a queen angelfish'
+  shape_path: shapes/queen_angelfish/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

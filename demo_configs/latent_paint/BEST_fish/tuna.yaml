@@ -1,7 +1,10 @@
 log:
-  exp_name: 'goldfish_new_branch'
+  exp_name: 'BEST_tuna'
 guide:
-  text: 'a goldfish'
+  text: 'a tuna'
   shape_path: shapes/blub.obj
+optim:
+  iters: 10000
+  seed: 10
 render:
   backbone: 'texture-mesh'

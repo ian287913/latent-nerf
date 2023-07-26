@@ -1,0 +1,10 @@
+log:
+  exp_name: 'goldfish_unconstrained_scaled'
+guide:
+  text: 'a goldfish'
+  mesh_scale: 1.0
+optim:
+  iters: 5000
+  seed: 10
+render:
+  nerf_type: 'latent'

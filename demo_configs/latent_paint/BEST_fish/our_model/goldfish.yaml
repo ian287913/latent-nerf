@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_goldfish_OURS'
+guide:
+  text: 'a goldfish'
+  shape_path: shapes/goldfish/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

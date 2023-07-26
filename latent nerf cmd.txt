@@ -1,0 +1,1 @@
+python -m scripts.train_latent_nerf --config_path demo_configs/latent_nerf/lego_man.yaml

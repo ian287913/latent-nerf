@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, Union, List
@@ -112,6 +113,7 @@ class Trainer:
 
     def train(self):
         logger.info('Starting training ^_^')
+        loss_history = []
         # Evaluate the initialization
         self.evaluate(self.dataloaders['val'], self.eval_renders_path)
         self.mesh_model.train()
@@ -127,13 +129,15 @@ class Trainer:
                 self.optimizer.zero_grad()
                 # ian: render image and send to diffusion to calculate the loss
                 # ian: is "pred_rgbs" rendered image or diffused image?
-                pred_rgbs, loss = self.train_render(data)
+                pred_rgbs, loss = self.train_render(data, loss_history = loss_history)
                 # ian: optimize according to the render
                 # ian: how to calc the gradient? where are the parameters??
                 self.optimizer.step()
 
+
                 if self.train_step % self.cfg.log.save_interval == 0:
                     self.save_checkpoint(full=True)
+                    ##self.get_eval_loss(self.dataloaders['val'], loss_history = loss_history)
                     self.evaluate(self.dataloaders['val'], self.eval_renders_path)
                     # ian: set model to train mode
                     self.mesh_model.train()
@@ -145,6 +149,7 @@ class Trainer:
         logger.info('Evaluating the last model...')
         self.full_eval()
         logger.info('\tDone!')
+        self.export_number_list(self.exp_path, loss_history, "loss_history")
 
     # ian: render frames with different perspectives imported from dataloader
     # ian: save rendered scenes and a texture of the mesh
@@ -196,7 +201,7 @@ class Trainer:
 
             logger.info(f"\tDone!")
 
-    def train_render(self, data: Dict[str, Any]):
+    def train_render(self, data: Dict[str, Any], loss_history = None):
         theta = data['theta']
         phi = data['phi']
         radius = data['radius']
@@ -213,10 +218,29 @@ class Trainer:
 
         # ian: IMPORTANT
         # Guidance loss
-        loss_guidance = self.diffusion.train_step(text_z, pred_rgb)
+        loss_guidance = self.diffusion.train_step(text_z, pred_rgb, loss_history = loss_history)
         loss = loss_guidance
 
         return pred_rgb, loss
+
+    def get_eval_loss(self, data: Dict[str, Any], loss_history = None):
+        theta = data['theta']
+        phi = data['phi']
+        radius = data['radius']
+
+        outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius)
+        pred_rgb = outputs['image']
+
+        # text embeddings
+        if self.cfg.guide.append_direction:
+            dirs = data['dir']  # [B,]
+            text_z = self.text_z[dirs]
+        else:
+            text_z = self.text_z
+
+        # ian: IMPORTANT
+        # Guidance loss
+        self.diffusion.calc_loss(text_z, pred_rgb, loss_history = loss_history)
 
     def eval_render(self, data):
         theta = data['theta']
@@ -319,3 +343,10 @@ class Trainer:
             ##old_ckpt.unlink(missing_ok=True)
 
         torch.save(state, self.ckpt_path / file_path)
+
+    def export_number_list(self, path, number_list, filename):
+        filepath = os.path.join(path, f'{filename}.txt')
+        with open(filepath, 'w') as fp:
+            for number in number_list:
+                fp.write(str(number) + "\n")
+        print(f'file exported to {filepath}.')

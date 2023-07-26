@@ -1,0 +1,11 @@
+log:
+  exp_name: 'goldfish_nerf_scaled_1'
+guide:
+  text: 'a goldfish'
+  shape_path: shapes/blub.obj
+  mesh_scale: 1.0
+optim:
+  iters: 20000
+  seed: 10
+render:
+  nerf_type: 'latent'

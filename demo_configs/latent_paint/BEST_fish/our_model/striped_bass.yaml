@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_striped_bass_OURS'
+guide:
+  text: 'a striped bass'
+  shape_path: shapes/striped_bass/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

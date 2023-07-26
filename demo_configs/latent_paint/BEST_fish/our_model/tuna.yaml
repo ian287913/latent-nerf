@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_tuna_OURS'
+guide:
+  text: 'a tuna'
+  shape_path: shapes/tuna/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'

@@ -1,0 +1,9 @@
+log:
+  exp_name: 'goldfish_unconstrained'
+guide:
+  text: 'a goldfish'
+optim:
+  iters: 50000
+  seed: 10
+render:
+  nerf_type: 'latent'

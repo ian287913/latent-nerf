@@ -1,0 +1,10 @@
+log:
+  exp_name: 'BEST_bowfin_fish_OURS'
+guide:
+  text: 'a bowfin fish'
+  shape_path: shapes/bowfin_fish/combined_mesh_mirrored.obj
+optim:
+  iters: 10000
+  seed: 10
+render:
+  backbone: 'texture-mesh'
